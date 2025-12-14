@@ -4,6 +4,7 @@ import { ToastContainer } from './components/ToastContainer';
 import { LandingPage } from './views/LandingPage';
 import { EarnerDashboard } from './views/EarnerDashboard';
 import { AdvertiserDashboard } from './views/AdvertiserDashboard';
+import { SettingsPage } from './views/SettingsPage';
 import { WalletState, UserRole, UserState, AppNotification, NotificationType, Language } from './types';
 import { simulateXAuth } from './services/mockService';
 
@@ -15,6 +16,9 @@ export default function App() {
   
   // Language State (Default English)
   const [language, setLanguage] = useState<Language>('EN');
+  
+  // View State (Dashboard vs Settings)
+  const [currentView, setCurrentView] = useState<'DASHBOARD' | 'SETTINGS'>('DASHBOARD');
 
   // Wallet State
   const [wallet, setWallet] = useState<WalletState>({
@@ -35,7 +39,8 @@ export default function App() {
     accountAgeDays: 0,
     referralCode: null,
     referralCount: 0,
-    referralEarnings: 0
+    referralEarnings: 0,
+    displayTwitterPublicly: true,
   });
 
   // Notifications State
@@ -68,6 +73,11 @@ export default function App() {
     }, 800);
   };
 
+  const handleDisconnectWallet = () => {
+    setWallet({ connected: false, address: null, balance: 0 });
+    addNotification('info', 'Wallet Disconnected');
+  };
+
   // Action-Specific Login/Navigation (Landing Page Buttons)
   const handleAuthAction = (targetRole: UserRole) => {
     if (wallet.connected) {
@@ -98,11 +108,17 @@ export default function App() {
       referralCount: 0,
       referralEarnings: 0
     }));
-    addNotification('info', 'Wallet Disconnected');
+    setCurrentView('DASHBOARD');
+    addNotification('info', 'Signed Out');
   };
 
   const handleRoleChange = (role: UserRole) => {
     setUserState(prev => ({ ...prev, role }));
+    setCurrentView('DASHBOARD');
+  };
+
+  const handleSettingsClick = () => {
+    setCurrentView('SETTINGS');
   };
 
   const linkXAccount = async () => {
@@ -133,11 +149,29 @@ export default function App() {
     }
   };
 
+  const handleDisconnectX = () => {
+    setUserState(prev => ({
+        ...prev,
+        xAccountLinked: false,
+        xUsername: null,
+        followerCount: 0
+    }));
+    addNotification('info', 'X Account Disconnected');
+  };
+
   const updateBalance = (amount: number) => {
     setWallet(prev => ({
       ...prev,
       balance: prev.balance + amount
     }));
+  };
+
+  const handleTogglePrivacy = () => {
+    setUserState(prev => {
+        const newState = !prev.displayTwitterPublicly;
+        addNotification('info', `Twitter visibility set to ${newState ? 'Public' : 'Hidden'}`);
+        return { ...prev, displayTwitterPublicly: newState };
+    });
   };
 
   // --- Routing Logic ---
@@ -149,6 +183,20 @@ export default function App() {
           language={language}
           onStartEarning={() => handleAuthAction(UserRole.EARNER)}
           onCreateCampaign={() => handleAuthAction(UserRole.ADVERTISER)}
+        />
+      );
+    }
+
+    if (currentView === 'SETTINGS') {
+      return (
+        <SettingsPage 
+          userState={userState}
+          wallet={wallet}
+          onBack={() => setCurrentView('DASHBOARD')}
+          onDisconnectWallet={handleDisconnectWallet}
+          onDisconnectX={handleDisconnectX}
+          onConnectX={linkXAccount}
+          onTogglePrivacy={handleTogglePrivacy}
         />
       );
     }
@@ -191,6 +239,7 @@ export default function App() {
         onDisconnect={handleDisconnect}
         onChangeRole={handleRoleChange}
         onLoginX={linkXAccount}
+        onSettingsClick={handleSettingsClick}
       />
       
       <main className="relative">

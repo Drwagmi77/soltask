@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Wallet, LogOut, LayoutDashboard, Menu, Sparkles, Globe, User } from 'lucide-react';
+import { Wallet, LogOut, LayoutDashboard, Menu, Sparkles, Globe, User, Settings } from 'lucide-react';
 import { Button } from './Button';
 import { WalletState, UserRole, Language, UserState } from '../types';
 
@@ -13,6 +13,7 @@ interface HeaderProps {
   onDisconnect: () => void;
   onChangeRole: (role: UserRole) => void;
   onLoginX: () => void;
+  onSettingsClick: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({ 
@@ -24,7 +25,8 @@ export const Header: React.FC<HeaderProps> = ({
   onConnect, 
   onDisconnect,
   onChangeRole,
-  onLoginX
+  onLoginX,
+  onSettingsClick
 }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLangOpen, setIsLangOpen] = useState(false);
@@ -160,6 +162,16 @@ export const Header: React.FC<HeaderProps> = ({
                         <Wallet size={16} /> Connect Wallet
                       </button>
                    )}
+                   
+                   <button 
+                    onClick={onSettingsClick}
+                    className="w-full flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-300 hover:bg-slate-800 transition-colors font-medium mb-1"
+                   >
+                     <Settings size={16} /> Settings
+                   </button>
+
+                   <div className="h-px bg-slate-800 my-1 mx-2"></div>
+
                    <button 
                     onClick={onDisconnect}
                     className="w-full flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-red-400 hover:bg-red-500/10 transition-colors font-medium"
@@ -200,6 +212,12 @@ export const Header: React.FC<HeaderProps> = ({
                   className={`w-full py-3 rounded-xl text-sm font-medium text-center border ${role === UserRole.ADVERTISER ? 'bg-purple-500/10 border-purple-500/30 text-white' : 'border-transparent text-slate-400 bg-slate-900'}`}
                 >
                   Create Campaign
+            </button>
+            <button 
+                  onClick={() => { onSettingsClick(); setIsMenuOpen(false); }}
+                  className={`w-full py-3 rounded-xl text-sm font-medium text-center border border-transparent text-slate-400 bg-slate-900 hover:text-white`}
+                >
+                  Settings
             </button>
           </div>
         </div>

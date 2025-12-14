@@ -67,6 +67,8 @@ export interface UserState {
   referralCode: string | null;
   referralCount: number;
   referralEarnings: number; // SOL earned from friends
+  // Settings
+  displayTwitterPublicly: boolean;
 }
 
 export interface Transaction {
